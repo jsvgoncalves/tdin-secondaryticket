@@ -21,7 +21,7 @@ public class SwapablePanel extends JPanel{
 	public void addPanel(String s, JPanel p){
 		panels_map.put(s, p);
 	}
-	
+
 	public void removePanel(String s){
 		panels_map.remove(s);
 	}
@@ -34,9 +34,11 @@ public class SwapablePanel extends JPanel{
 	}
 
 	public void switchTo(String panel_key){
-		removeAll();
-		add(panels_map.get(panel_key));
-		revalidate();
-		repaint();
+		if(panels_map.containsKey(panel_key)){
+			removeAll();
+			add(panels_map.get(panel_key));
+			revalidate();
+			repaint();
+		}
 	}
 }

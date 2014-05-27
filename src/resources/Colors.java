@@ -17,5 +17,10 @@ public class Colors {
 	
 	public static final Color BUTTON_PRESSED_TEXTCOLOR = dark_grey; //orange
 	public static final Color BUTTON_PRESSED_BACKCOLOR = orange; //darkgrey
+	
+	
+	public static final Color TICKET_SELECTED_BACKCOLOR  = orange;
+	public static final Color TICKET_IDLE_BACKCOLOR   	 = Color.white;
+
 
 }

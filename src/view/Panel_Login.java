@@ -13,6 +13,8 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import com.sun.glass.ui.Application;
+
 import resources.Colors;
 import resources.Icons;
 import resources.Strings;
@@ -23,9 +25,10 @@ public class Panel_Login extends JPanel{
 	 * Panel used for all the login operations
 	 */
 	private static final long serialVersionUID = 3282961147446486244L;
-	JPanel left_panel = new JPanel();
-	SwapablePanel swap_panel = new SwapablePanel();
-	JPanel login_panel = new JPanel(), register_panel = new JPanel();
+	private final int margins = 2;
+	private JPanel left_panel = new JPanel();
+	private SwapablePanel swap_panel = new SwapablePanel();
+	private JPanel login_panel = new JPanel(), register_panel = new JPanel();
 
 	private final String ID_LOGIN = "LOGIN";
 	private final String ID_REGISTER = "REGISTER";
@@ -61,6 +64,8 @@ public class Panel_Login extends JPanel{
 		login_panel.setLayout(new BoxLayout(login_panel, BoxLayout.PAGE_AXIS));
 		Button_App login_btn = new Button_App(Strings.BUTTON_LOGIN);
 		Button_App register_btn = new Button_App(Strings.BUTTON_REGISTER);
+		login_btn.setFont(login_btn.getFont().deriveFont(17f));
+		register_btn.setFont(register_btn.getFont().deriveFont(17f));
 
 		register_btn.addActionListener(new ActionListener() {
 
@@ -77,6 +82,7 @@ public class Panel_Login extends JPanel{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				//TODO: LOGIN USER
+				ApplicationFrame.SwitchPanel(ApplicationFrame.PANEL_TICKER_AREA_ID);
 			}
 		});
 
@@ -84,11 +90,12 @@ public class Panel_Login extends JPanel{
 		HintTextField password_txt = new HintTextField(Strings.HINT_PASSWORD, HintTextField.TYPE_PASSWORD);
 		username_txt.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
 		password_txt.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
+
 		username_txt.setBorder(BorderFactory.createCompoundBorder(
-				BorderFactory.createMatteBorder(0, 2, 1, 2, Color.DARK_GRAY),
+				BorderFactory.createMatteBorder(0, margins, 1, margins, Colors.dark_grey),
 				BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 		password_txt.setBorder(BorderFactory.createCompoundBorder(
-				BorderFactory.createMatteBorder(0, 2, 0, 2, Color.DARK_GRAY),
+				BorderFactory.createMatteBorder(0, margins, 0, margins, Colors.dark_grey),
 				BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 
 		//Make buttons occupy all width
@@ -96,11 +103,13 @@ public class Panel_Login extends JPanel{
 		btn_login_panel.setLayout(new BorderLayout());
 		btn_login_panel.add(login_btn);
 		btn_login_panel.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
+		btn_login_panel.setBorder(BorderFactory.createMatteBorder(0, margins, 0, margins, Colors.dark_grey));
 
 		JPanel btn_register_panel = new JPanel();
 		btn_register_panel.setLayout(new BorderLayout());
 		btn_register_panel.add(register_btn);
 		btn_register_panel.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
+		btn_register_panel.setBorder(BorderFactory.createMatteBorder(0, margins, 0, margins, Colors.dark_grey));
 
 		login_panel.add(Box.createVerticalGlue());
 		login_panel.add(username_txt);
@@ -117,9 +126,11 @@ public class Panel_Login extends JPanel{
 		register_panel.setLayout(new BoxLayout(register_panel, BoxLayout.PAGE_AXIS));
 		Button_App cancel_btn = new Button_App(Strings.BUTTON_CANCEL);
 		Button_App register_btn = new Button_App(Strings.BUTTON_REGISTER);
-
+		
+		cancel_btn.setFont(cancel_btn.getFont().deriveFont(17f));
+		register_btn.setFont(register_btn.getFont().deriveFont(17f));
+		
 		cancel_btn.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				initLoginInterface();
@@ -129,7 +140,6 @@ public class Panel_Login extends JPanel{
 		});
 		
 		register_btn.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				//TODO: REGISTER USER
@@ -145,29 +155,30 @@ public class Panel_Login extends JPanel{
 		password_txt.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
 		repassword_txt.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
 		department_key_txt.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
-
 		repassword_txt.setBorder(BorderFactory.createCompoundBorder(
-				BorderFactory.createMatteBorder(0, 2, 1, 2, Color.DARK_GRAY),
+				BorderFactory.createMatteBorder(0, margins, 1, margins, Colors.dark_grey),
 				BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 		username_txt.setBorder(BorderFactory.createCompoundBorder(
-				BorderFactory.createMatteBorder(0, 2, 1, 2, Color.DARK_GRAY),
+				BorderFactory.createMatteBorder(0, margins, 1, margins, Colors.dark_grey),
 				BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 		password_txt.setBorder(BorderFactory.createCompoundBorder(
-				BorderFactory.createMatteBorder(0, 2, 1, 2, Color.DARK_GRAY),
+				BorderFactory.createMatteBorder(0, margins, 1, margins, Colors.dark_grey),
 				BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 		department_key_txt.setBorder(BorderFactory.createCompoundBorder(
-				BorderFactory.createMatteBorder(0, 2, 0, 2, Color.DARK_GRAY),
+				BorderFactory.createMatteBorder(0, margins, 0, margins, Colors.dark_grey),
 				BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 		//Make buttons occupy all width
 		JPanel btn_cancel_panel = new JPanel();
 		btn_cancel_panel.setLayout(new BorderLayout());
 		btn_cancel_panel.add(cancel_btn);
 		btn_cancel_panel.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
-
+		btn_cancel_panel.setBorder(BorderFactory.createMatteBorder(0, margins, 0, margins, Colors.dark_grey));
+		
 		JPanel btn_register_panel = new JPanel();
 		btn_register_panel.setLayout(new BorderLayout());
 		btn_register_panel.add(register_btn);
 		btn_register_panel.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
+		btn_register_panel.setBorder(BorderFactory.createMatteBorder(0, margins, 0, margins, Colors.dark_grey));
 
 		register_panel.add(Box.createVerticalGlue());
 		register_panel.add(username_txt);
