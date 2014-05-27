@@ -13,8 +13,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.sun.glass.ui.Application;
-
 import resources.Colors;
 import resources.Icons;
 import resources.Strings;

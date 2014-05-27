@@ -14,6 +14,7 @@ public class Strings {
 
 	//Buttons
 	public static final String BUTTON_LOGIN 	= "Login";
+	public static final String BUTTON_LOGOUT 	= "Logout";
 	public static final String BUTTON_REGISTER 	= "Register";
 	public static final String BUTTON_CANCEL 	= "Cancel";
 	public static final String BUTTON_SOLVE 	= "Solve";
