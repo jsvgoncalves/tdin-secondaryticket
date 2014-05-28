@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -84,17 +85,14 @@ public class Panel_Login extends JPanel{
 			}
 		});
 
-		HintTextField username_txt = new HintTextField(Strings.HINT_USERNAME, HintTextField.TYPE_TEXT);
-		HintTextField password_txt = new HintTextField(Strings.HINT_PASSWORD, HintTextField.TYPE_PASSWORD);
+		String[] data = {"Departamento1", "Departamento2"};
+		Java2sAutoComboBox username_txt = new Java2sAutoComboBox(Arrays.asList(data));
 		username_txt.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
-		password_txt.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
 
 		username_txt.setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createMatteBorder(0, margins, 1, margins, Colors.dark_grey),
 				BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-		password_txt.setBorder(BorderFactory.createCompoundBorder(
-				BorderFactory.createMatteBorder(0, margins, 0, margins, Colors.dark_grey),
-				BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+		
 
 		//Make buttons occupy all width
 		JPanel btn_login_panel = new JPanel();
@@ -111,7 +109,6 @@ public class Panel_Login extends JPanel{
 
 		login_panel.add(Box.createVerticalGlue());
 		login_panel.add(username_txt);
-		login_panel.add(password_txt);
 		login_panel.add(btn_login_panel);
 		login_panel.add(btn_register_panel);
 		login_panel.add(Box.createVerticalGlue());
@@ -145,8 +142,8 @@ public class Panel_Login extends JPanel{
 		});
 
 		HintTextField username_txt = new HintTextField(Strings.HINT_USERNAME, HintTextField.TYPE_TEXT);
-		HintTextField password_txt = new HintTextField(Strings.HINT_PASSWORD, HintTextField.TYPE_PASSWORD);
-		HintTextField repassword_txt = new HintTextField(Strings.HINT_RETYPE_PASSWORD, HintTextField.TYPE_PASSWORD);
+		HintTextField password_txt = new HintTextField(Strings.HINT_SOLVER, HintTextField.TYPE_TEXT);
+		HintTextField repassword_txt = new HintTextField(Strings.HINT_DESCRIPTION, HintTextField.TYPE_TEXT);
 		HintTextField department_key_txt = new HintTextField(Strings.HINT_DEPARTMENT_KEY, HintTextField.TYPE_PASSWORD);
 
 		username_txt.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));

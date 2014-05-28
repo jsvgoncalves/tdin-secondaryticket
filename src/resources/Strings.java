@@ -6,9 +6,9 @@ public class Strings {
 	public static final String TITLE_SOLUTION = "Response";
 
 	//Login
-	public static final String HINT_USERNAME 		= "Username";
-	public static final String HINT_PASSWORD 		= "Password";
-	public static final String HINT_RETYPE_PASSWORD = "Retype Password";
+	public static final String HINT_USERNAME 		= "Name";
+	public static final String HINT_SOLVER 			= "Solver's Name";
+	public static final String HINT_DESCRIPTION		= "Description";
 	public static final String HINT_DEPARTMENT_KEY  = "Department Key";
 
 
