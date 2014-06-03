@@ -6,6 +6,10 @@ import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import org.json.JSONArray;
+
+import network.NetworkManager;
+
 import resources.Strings;
 
 public class ApplicationFrame extends JFrame{
@@ -20,7 +24,12 @@ public class ApplicationFrame extends JFrame{
 	private JPanel ticket_panel = new Panel_Tickets();
 	
 	public ApplicationFrame() {
+		
+
+		
 		init();
+		
+
 	}
 
 	private void init() {

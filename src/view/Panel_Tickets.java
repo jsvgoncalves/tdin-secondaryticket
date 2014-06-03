@@ -18,7 +18,7 @@ import javax.swing.JTextArea;
 
 import resources.Colors;
 import resources.Strings;
-import controller.Variables;
+import controller.DataStore;
 import model.Ticket;
 
 public class Panel_Tickets extends JPanel{
@@ -66,7 +66,7 @@ public class Panel_Tickets extends JPanel{
 
 	public static void loadTicket(String uuid){
 		ticket_area.setBackground(Colors.dark_grey);
-		Ticket t = Variables.tickets.get(uuid);
+		Ticket t = DataStore.getInstance().tickets.get(uuid);
 		ticket_area.removeAll();
 		ticket_area.setLayout(new BorderLayout());
 
@@ -169,7 +169,7 @@ public class Panel_Tickets extends JPanel{
 			t.setEmail("myemail" + i + "@mail.com");
 			final Panel_Ticket tp = new Panel_Ticket(t);
 
-			Variables.tickets.put(t.getID(), t);
+			DataStore.getInstance().tickets.put(t.getID(), t);
 			ticket_list.add(tp);
 			if(i == 0){
 				tp.setSelected(true);

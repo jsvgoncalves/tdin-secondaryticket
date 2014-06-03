@@ -6,13 +6,22 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import model.Department;
+import network.NetworkManager;
+
+import org.json.JSONArray;
+
+import controller.DataStore;
 
 import resources.Colors;
 import resources.Icons;
@@ -31,6 +40,9 @@ public class Panel_Login extends JPanel{
 
 	private final String ID_LOGIN = "LOGIN";
 	private final String ID_REGISTER = "REGISTER";
+	
+	
+	//private ArrayList<Department> departmentList = new ArrayList<Department>();
 
 	public Panel_Login() {
 		init();
@@ -65,7 +77,31 @@ public class Panel_Login extends JPanel{
 		Button_App register_btn = new Button_App(Strings.BUTTON_REGISTER);
 		login_btn.setFont(login_btn.getFont().deriveFont(17f));
 		register_btn.setFont(register_btn.getFont().deriveFont(17f));
+		
+		
 
+		DataStore store = DataStore.getInstance();
+		final JComboBox<Department> username_txt = new JComboBox<Department>();
+		
+		//departmentList.clear();
+		
+		if( store.departments != null )
+		{
+			for(Department d : DataStore.getInstance().departments.values())
+			{
+				username_txt.addItem(d);
+			}
+		}
+		
+		//final Java2sAutoComboBox username_txt = new Java2sAutoComboBox(departmentList);
+		
+		
+		username_txt.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
+
+		username_txt.setBorder(BorderFactory.createCompoundBorder(
+				BorderFactory.createMatteBorder(0, margins, 1, margins, Colors.dark_grey),
+				BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+		
 		register_btn.addActionListener(new ActionListener() {
 
 			@Override
@@ -80,18 +116,29 @@ public class Panel_Login extends JPanel{
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				//TODO: LOGIN USER
-				ApplicationFrame.SwitchPanel(ApplicationFrame.PANEL_TICKER_AREA_ID);
+//				if( username_txt.getSelectedIndex() >= 0 )
+//				{
+//					Department dep = departmentList.get(username_txt.getSelectedIndex());
+				Department dep = null;
+				try
+				{
+					dep = (Department) username_txt.getSelectedItem();
+				} catch(Exception e) {
+				}
+				
+				if( dep != null )
+				{
+					if( dep.getName().length() > 0 )
+					{
+						DataStore.getInstance().manager = NetworkManager.createNetworkManager(dep.getName(), DataStore.DEPARTMENT_PASSWORD_KEY);
+						
+						ApplicationFrame.SwitchPanel(ApplicationFrame.PANEL_TICKER_AREA_ID);
+					}
+				}
 			}
 		});
+		
 
-		String[] data = {"Departamento1", "Departamento2"};
-		Java2sAutoComboBox username_txt = new Java2sAutoComboBox(Arrays.asList(data));
-		username_txt.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
-
-		username_txt.setBorder(BorderFactory.createCompoundBorder(
-				BorderFactory.createMatteBorder(0, margins, 1, margins, Colors.dark_grey),
-				BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 		
 
 		//Make buttons occupy all width
@@ -134,29 +181,31 @@ public class Panel_Login extends JPanel{
 			}
 		});
 		
+
+
+		HintTextField department_txt = new HintTextField(Strings.HINT_USERNAME, HintTextField.TYPE_TEXT);
+		HintTextField solver_name_txt = new HintTextField(Strings.HINT_SOLVER, HintTextField.TYPE_TEXT);
+		HintTextField description_txt = new HintTextField(Strings.HINT_DESCRIPTION, HintTextField.TYPE_TEXT);
+		HintTextField department_key_txt = new HintTextField(Strings.HINT_DEPARTMENT_KEY, HintTextField.TYPE_PASSWORD);
+		
 		register_btn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				//TODO: REGISTER USER
+				
 			}
 		});
 
-		HintTextField username_txt = new HintTextField(Strings.HINT_USERNAME, HintTextField.TYPE_TEXT);
-		HintTextField password_txt = new HintTextField(Strings.HINT_SOLVER, HintTextField.TYPE_TEXT);
-		HintTextField repassword_txt = new HintTextField(Strings.HINT_DESCRIPTION, HintTextField.TYPE_TEXT);
-		HintTextField department_key_txt = new HintTextField(Strings.HINT_DEPARTMENT_KEY, HintTextField.TYPE_PASSWORD);
-
-		username_txt.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
-		password_txt.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
-		repassword_txt.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
+		department_txt.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
+		solver_name_txt.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
+		description_txt.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
 		department_key_txt.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
-		repassword_txt.setBorder(BorderFactory.createCompoundBorder(
+		description_txt.setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createMatteBorder(0, margins, 1, margins, Colors.dark_grey),
 				BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-		username_txt.setBorder(BorderFactory.createCompoundBorder(
+		department_txt.setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createMatteBorder(0, margins, 1, margins, Colors.dark_grey),
 				BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-		password_txt.setBorder(BorderFactory.createCompoundBorder(
+		solver_name_txt.setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createMatteBorder(0, margins, 1, margins, Colors.dark_grey),
 				BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 		department_key_txt.setBorder(BorderFactory.createCompoundBorder(
@@ -176,9 +225,9 @@ public class Panel_Login extends JPanel{
 		btn_register_panel.setBorder(BorderFactory.createMatteBorder(0, margins, 0, margins, Colors.dark_grey));
 
 		register_panel.add(Box.createVerticalGlue());
-		register_panel.add(username_txt);
-		register_panel.add(password_txt);
-		register_panel.add(repassword_txt);
+		register_panel.add(department_txt);
+		register_panel.add(solver_name_txt);
+		register_panel.add(description_txt);
 		register_panel.add(department_key_txt);
 		register_panel.add(btn_register_panel);
 		register_panel.add(btn_cancel_panel);

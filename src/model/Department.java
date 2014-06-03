@@ -2,6 +2,8 @@ package model;
 
 import org.json.JSONObject;
 
+import resources.JSONHelper;
+
 public class Department {
 	
 	private String id, name, solverName, created, modified, description;
@@ -19,12 +21,12 @@ public class Department {
 	
 	public Department(JSONObject obj)
 	{
-		this.id = obj.getString("id");
-		this.name = obj.getString("name");
-		this.solverName = obj.getString("solver_name");
-		this.created = obj.getString("created");
-		this.modified = obj.getString("modified");
-		this.description = obj.getString("description");
+		this.id = JSONHelper.getString(obj, "id", "");
+		this.name = JSONHelper.getString(obj, "name", "");
+		this.solverName = JSONHelper.getString(obj, "solver_name", "");
+		this.created = JSONHelper.getString(obj, "created", "");
+		this.modified = JSONHelper.getString(obj, "modified", "");
+		this.description = JSONHelper.getString(obj, "description", "");
 	}
 
 	public String getId() {
