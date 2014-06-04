@@ -1,17 +1,16 @@
 package controller;
 
-import java.util.ArrayList;
+import java.io.IOException;
 
 import javax.swing.UIManager;
 
-import model.Department;
 import network.NetworkManager;
 import resources.Icons;
 import view.ApplicationFrame;
 
 public class Main {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		  try {
 			UIManager.setLookAndFeel(
 			            UIManager.getSystemLookAndFeelClassName());
@@ -22,20 +21,14 @@ public class Main {
 		Icons.initResources();
 		
 		
-		NetworkManager netMgr = NetworkManager.createNetworkManager(null, null);
-	
-		ArrayList<Department> list = new ArrayList<Department>();
-		DataStore store = DataStore.getInstance();
+		DataStore store = DataStore.getInstance(null);
 		
-		store.manager = netMgr;
+		store.manager = NetworkManager.createNetworkManager(null, null);
 		
-		netMgr.getDepartmentsList(list);
+		if( store.fetchDepartments() )
+			store.writeStore(null);
 		
-		for(Department d : list)
-		{
-			if( d != null && d.getId() != null)
-				store.departments.put(d.getId(), d);
-		}
+		SyncController.getInstance().start();
 		
 		new ApplicationFrame();
 	}

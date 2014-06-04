@@ -1,26 +1,52 @@
 package model;
 
+import java.io.Serializable;
+
 import org.json.JSONObject;
 
 import resources.JSONHelper;
 
-public class SecondaryTicket {
+public class SecondaryTicket implements Serializable {
 	
-	private String ID, ticketID, departmentID, status, created, modified, title, description, reply;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4983561656489887289L;
+	
+	
+	
+	private String ID, ticketID, departmentID, created, modified, title, description, reply;
+	private int status;
 	private Ticket associatedTicket = null;
+	
+	
+	public static enum STATUS {
+		WAITING(2),
+		SOLVED(3);
+		
+		public final int CODE;
+		private STATUS(int status)
+		{
+			this.CODE = status;
+		}
+	};
 
 	
 	public SecondaryTicket(JSONObject obj)
 	{
-		this.ID = JSONHelper.getString(obj, "id", "");
-		this.ticketID = JSONHelper.getString(obj, "ticket_id", "");
-		this.departmentID = JSONHelper.getString(obj, "department_id", "");
-		this.status = JSONHelper.getString(obj, "status", "");
-		this.created = JSONHelper.getString(obj, "created", "");
-		this.modified = JSONHelper.getString(obj, "modified", "");
-		this.title = JSONHelper.getString(obj, "title", "");
-		this.description = JSONHelper.getString(obj, "description", "");
-		this.reply = JSONHelper.getString(obj, "reply", "");
+		this.ID = JSONHelper.getString(obj, "id", "").trim();
+		this.ticketID = JSONHelper.getString(obj, "ticket_id", "").trim();
+		this.departmentID = JSONHelper.getString(obj, "department_id", "").trim();
+		try {
+			this.status = Integer.valueOf( JSONHelper.getString(obj, "status", "0").trim() );
+		} catch(NumberFormatException e) {
+			this.status = STATUS.WAITING.CODE;
+		}
+		this.created = JSONHelper.getString(obj, "created", "").trim();
+		this.modified = JSONHelper.getString(obj, "modified", "").trim();
+		this.title = JSONHelper.getString(obj, "title", "").trim();
+		this.description = JSONHelper.getString(obj, "description", "").trim();
+		this.reply = JSONHelper.getString(obj, "reply", "").trim();
 	}
 	
 	
@@ -42,10 +68,10 @@ public class SecondaryTicket {
 	}
 
 
-	public String getStatus() {
+	public int getStatus() {
 		return status;
 	}
-	public void setStatus(String status) {
+	public void setStatus(int status) {
 		this.status = status;
 	}
 
@@ -104,6 +130,24 @@ public class SecondaryTicket {
 
 	public void setAssociatedTicket(Ticket associatedTicket) {
 		this.associatedTicket = associatedTicket;
+	}
+	
+	
+	
+	public String getSubmitedBy()
+	{
+		if(associatedTicket == null)
+			return "Unknow";
+		
+		return String.format("%s <%s>", associatedTicket.getUserName(), associatedTicket.getUserEmail());
+	}
+	
+	public String getSolver()
+	{
+		if(associatedTicket == null)
+			return "Unknow";
+		
+		return String.format("%s <%s>", associatedTicket.getSolverName(), associatedTicket.getSolverEmail());
 	}
 
 	@Override

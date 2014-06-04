@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 
+import resources.SecondaryTicketCallbackInterface;
 import resources.Strings;
 
 public class ApplicationFrame extends JFrame{
@@ -48,8 +49,20 @@ public class ApplicationFrame extends JFrame{
 		swap_panel.switchTo(id); //Use login panel as default
 	}
 	
-	public static void reloadDepartmentTickets()
+	public static SecondaryTicketCallbackInterface getSecondaryTicketListener()
 	{
-		ticket_panel.loadSecondaryTickets();
+		return ticket_panel;
+	}
+	
+	public static void clearSpace()
+	{
+		Panel_Tickets.ticket_area.removeAll();
+		Panel_Tickets.ticket_area.revalidate();
+	}
+	
+	public static void redraw()
+	{
+		swap_panel.validate();
+		swap_panel.repaint();
 	}
 }

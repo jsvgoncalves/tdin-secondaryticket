@@ -25,9 +25,11 @@ public class Panel_Ticket extends JPanel implements MouseListener{
 	private boolean isSelected = false;
 	private SecondaryTicket ticket;
 	JPanel content_panel = new JPanel();
+	private Panel_Tickets mainPanel = null;
 
-	public Panel_Ticket(SecondaryTicket ticket) {
+	public Panel_Ticket(SecondaryTicket ticket, Panel_Tickets mainPanel) {
 		this.ticket = ticket;
+		this.mainPanel = mainPanel;
 		isSelected = false;
 		init();
 		addMouseListener(this);
@@ -66,7 +68,7 @@ public class Panel_Ticket extends JPanel implements MouseListener{
 		if(isSelected)
 		{
 			setBackground(Colors.TICKET_SELECTED_BACKCOLOR);
-			Panel_Tickets.loadTicket(this.gettiTicket().getID());
+			mainPanel.loadTicket(this.gettiTicket().getID());
 		}
 		else{
 			setBackground(Colors.TICKET_IDLE_BACKCOLOR);
@@ -94,4 +96,19 @@ public class Panel_Ticket extends JPanel implements MouseListener{
 
 	@Override
 	public void mouseReleased(MouseEvent arg0) {}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if(    obj != null
+			&& obj.getClass() == SecondaryTicket.class )
+		{
+			SecondaryTicket _ticket = (SecondaryTicket)obj;
+			
+			return this.ticket != null && this.ticket.equals(_ticket.getID());
+		}
+		
+		
+		return super.equals(obj);
+	}
 }

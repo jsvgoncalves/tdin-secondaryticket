@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -25,6 +24,7 @@ import controller.DataStore;
 
 import resources.Colors;
 import resources.Icons;
+import resources.SecondaryTicketCallbackInterface;
 import resources.Strings;
 
 public class Panel_Login extends JPanel{
@@ -87,9 +87,11 @@ public class Panel_Login extends JPanel{
 		
 		if( store.departments != null )
 		{
-			for(Department d : DataStore.getInstance().departments.values())
-			{
-				username_txt.addItem(d);
+			synchronized (store.getSyncMutex()) {
+				for(Department d : DataStore.getInstance().departments.values())
+				{
+					username_txt.addItem(d);
+				}
 			}
 		}
 		
@@ -131,27 +133,28 @@ public class Panel_Login extends JPanel{
 					if( dep.getName().length() > 0 )
 					{
 						DataStore store = DataStore.getInstance();
+						SecondaryTicketCallbackInterface callback = ApplicationFrame.getSecondaryTicketListener();
+						
 						store.currentLoggedDepartment = dep.getId();
-						store.manager = NetworkManager.createNetworkManager(store.currentLoggedDepartment, DataStore.DEPARTMENT_PASSWORD_KEY);
 						
-						ArrayList<SecondaryTicket> secTickets = new ArrayList<SecondaryTicket>();
-						store.manager.getDepartmentTickets(secTickets, store.currentLoggedDepartment, "0");
-						
-						List<SecondaryTicket> list = store.secTickets.get( store.currentLoggedDepartment );
-						
-						if( list == null )
-						{
-							list = new ArrayList<SecondaryTicket>();
-							store.secTickets.put( store.currentLoggedDepartment, list );
+						synchronized (store.getSyncMutex()) {
+							
+							callback.clearAll();
+
+							store.manager = NetworkManager.createNetworkManager(store.currentLoggedDepartment, DataStore.DEPARTMENT_PASSWORD_KEY);
+							store.fetchDepartmentTickets(null);
+							
+							List<SecondaryTicket> ticketList = store.secTickets.get(store.currentLoggedDepartment);
+							
+							if( ticketList != null )
+							{
+								for(SecondaryTicket ticket : ticketList)
+								{
+									callback.appendSecondaryTicket(ticket);
+								}
+							}
 						}
 						
-						for(SecondaryTicket s : secTickets)
-						{
-							if( store.secTicketsDB.put(s.getID(), s) == null )
-								list.add(s);
-						}
-						
-						ApplicationFrame.reloadDepartmentTickets();
 						ApplicationFrame.SwitchPanel(ApplicationFrame.PANEL_TICKER_AREA_ID);
 					}
 				}
@@ -203,15 +206,34 @@ public class Panel_Login extends JPanel{
 		
 
 
-		HintTextField department_txt = new HintTextField(Strings.HINT_USERNAME, HintTextField.TYPE_TEXT);
-		HintTextField solver_name_txt = new HintTextField(Strings.HINT_SOLVER, HintTextField.TYPE_TEXT);
-		HintTextField description_txt = new HintTextField(Strings.HINT_DESCRIPTION, HintTextField.TYPE_TEXT);
-		HintTextField department_key_txt = new HintTextField(Strings.HINT_DEPARTMENT_KEY, HintTextField.TYPE_PASSWORD);
+		final HintTextField department_txt = new HintTextField(Strings.HINT_USERNAME, HintTextField.TYPE_TEXT);
+		final HintTextField solver_name_txt = new HintTextField(Strings.HINT_SOLVER, HintTextField.TYPE_TEXT);
+		final HintTextField description_txt = new HintTextField(Strings.HINT_DESCRIPTION, HintTextField.TYPE_TEXT);
+		final HintTextField department_key_txt = new HintTextField(Strings.HINT_DEPARTMENT_KEY, HintTextField.TYPE_PASSWORD);
 		
 		register_btn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				
+				DataStore store = DataStore.getInstance();
+				boolean success = false;
+				
+				synchronized (store.getSyncMutex()) {
+					success = store.manager.registerDepartment(new String(department_txt.getPassword()).trim(),
+														new String(solver_name_txt.getPassword()).trim(),
+														new String(description_txt.getPassword()).trim(),
+														new String(department_key_txt.getPassword()).trim() );
+					
+					if( success )
+					{
+						if( store.fetchDepartments() )
+							store.writeStore(null);
+						
+						initLoginInterface();
+						swap_panel.updatePanel(ID_LOGIN, login_panel);
+						swap_panel.switchTo(ID_LOGIN);
+					}
+				}
 			}
 		});
 

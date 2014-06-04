@@ -13,6 +13,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
@@ -28,6 +29,8 @@ import resources.JSONHelper;
 import com.sun.istack.internal.logging.Logger;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
+import controller.DataStore;
+
 public class NetworkManager {
 	
 	
@@ -42,8 +45,11 @@ public class NetworkManager {
 
     private static final String host = "http://ticket.algumavez.com";
     private static final String URL_DEPARTMENTS = "/departments.json";
+    private static final String URL_DEPARTMENTS_ADD = "/departments/add.json";
     
     private static final String URL_SEC_TICKETS = "/secondary_tickets/getLastTickets/%s/%s.json";
+    
+    private static final String URL_SEC_TICKETS_REPLY = "/secondary_tickets/edit/%s.json";
     
     
     private static final String DEPARTMENT_LIST_KEY = "departments";
@@ -76,7 +82,8 @@ public class NetworkManager {
     
     
     
-    private NetworkResponse _performRequest(String url, boolean isSimple, String method, Map<String, String> params)
+	@SuppressWarnings("unused")
+	private NetworkResponse _performRequest(String url, boolean isSimple, String method, Map<String, String> params)
     {
     	NetworkResponse response = new NetworkResponse();
     	
@@ -86,7 +93,7 @@ public class NetworkManager {
             
             if(params != null && !params.isEmpty())
             {
-            	StringBuilder sb = new StringBuilder("?");
+            	StringBuilder sb = new StringBuilder();
             	
             	int _count = 0;
             	
@@ -105,11 +112,23 @@ public class NetworkManager {
             }
             
             if( !isSimple || query == null )
+            {
             	_url = new URL(host + url);
+            	
+	            if( DataStore.DEBUG_LEVEL >= 1 )
+	            	System.out.println(_url);
+            	
+            	if( DataStore.DEBUG_LEVEL >= 2 )
+            		System.out.println(query);
+            }
             else
-            	_url = new URL(host + url + query);
+            {
+            	_url = new URL(host + url + 
+            						(query.length() > 0 ? ( "?" + query ) : "" ) );
             
-            System.out.println(_url);
+	            if( DataStore.DEBUG_LEVEL >= 1 )
+	            	System.out.println(_url);
+            }
 
 
             HttpURLConnection c = (HttpURLConnection) _url.openConnection();
@@ -123,9 +142,11 @@ public class NetworkManager {
             if( networkLogin != null )
             	c.setRequestProperty ("Authorization", "Basic " + networkLogin);
             
-            if( isSimple )
-            	c.setRequestProperty("Content-length", "0");
+            c.setRequestMethod(method.toUpperCase());
             
+            if( isSimple )
+            	c.setRequestProperty("Content-length", "0");	
+
             else
             {
             	c.setRequestProperty("Accept-Charset", DEFAULT_CHARTSET);
@@ -140,8 +161,6 @@ public class NetworkManager {
                     }
             	}
             }
-            
-            c.setRequestMethod(method.toUpperCase());
 
             c.connect();
             
@@ -149,12 +168,17 @@ public class NetworkManager {
             response.statusCode = c.getResponseCode();
             response.contentType = c.getContentType();
             
-            System.out.println("[" + response.statusCode + "] " + response.contentType);
+            if( DataStore.DEBUG_LEVEL >= 1 )
+            	System.out.println("[" + method + "|" + response.statusCode + "] " + response.contentType);
             
-//            for(Entry<String, List<String>> e : c.getHeaderFields().entrySet())
-//            {
-//            	System.out.println(e.getKey() + ": " + e.getValue());
-//            }
+            if( DataStore.DEBUG_LEVEL >= 2 )
+            {
+	            for(Entry<String, List<String>> e : c.getHeaderFields().entrySet())
+	            {
+	            	System.out.println(e.getKey() + ": " + e.getValue());
+	            }
+            }
+            
             InputStream is = null;
             
             if (response.statusCode >= 400) {
@@ -172,7 +196,8 @@ public class NetworkManager {
             br.close();
             response.rawResponse = sb.toString();
             
-            //System.out.println(response.rawResponse);
+            if( DataStore.DEBUG_LEVEL >= 2 )
+            	System.out.println(response.rawResponse);
             
             try {
 	            String[] ctype = response.contentType.split("\\;");
@@ -227,10 +252,7 @@ public class NetworkManager {
     {
     	return _performRequest(url, false, method, params);
     }
-    
-    
-    
-    
+
     
     
 
@@ -334,12 +356,42 @@ public class NetworkManager {
     	
     	try {
     		HashMap<String, String> query = new HashMap<String, String>();
-    		query.put("department", departament);
-    		query.put("solverName", solver);
-    		query.put("description", description);
-    		query.put("departmentKey", key);
+    		query.put("data[Department][name]", departament);
+    		query.put("data[Department][solver_name]", solver);
+    		query.put("data[Department][description]", description);
+    		//query.put("data[Department][key]", key);
     		
-    		NetworkResponse res = _performContentRequest(URL_DEPARTMENTS, "POST", query);
+    		NetworkResponse res = _performContentRequest(URL_DEPARTMENTS_ADD, "POST", query);
+    		
+    		return res.ok;
+    		
+    	} catch(Exception ex) {
+    		Logger.getLogger(NetworkManager.class).log(Level.SEVERE, null, ex);
+    	}
+    	
+    	return false;
+    }
+    
+    public boolean replyTicket(SecondaryTicket secTicket)
+    {
+    	if( secTicket == null )
+    		return false;
+    	
+    	try {
+    		
+    		String url = String.format(URL_SEC_TICKETS_REPLY, secTicket.getID());
+    		
+    		HashMap<String, String> query = new HashMap<String, String>();
+    		query.put("_method", "PUT");
+    		query.put("data[SecondaryTicket][id]", secTicket.getID());
+    		query.put("data[SecondaryTicket][ticket_id]", secTicket.getTicketID());
+    		query.put("data[SecondaryTicket][department_id]", secTicket.getDepartmentID());
+    		query.put("data[SecondaryTicket][status]", "" + secTicket.getStatus());
+    		query.put("data[SecondaryTicket][title]", secTicket.getTitle());
+    		query.put("data[SecondaryTicket][description]", secTicket.getDescription());
+    		query.put("data[SecondaryTicket][reply]", secTicket.getReply());
+    		
+    		NetworkResponse res = _performContentRequest(url, "POST", query);
     		
     		return res.ok;
     		

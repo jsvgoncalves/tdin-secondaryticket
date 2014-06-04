@@ -1,10 +1,18 @@
 package model;
 
+import java.io.Serializable;
+
 import org.json.JSONObject;
 
 import resources.JSONHelper;
 
-public class Department {
+public class Department implements Serializable {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8986234707451660814L;
+	
 	
 	private String id, name, solverName, created, modified, description;
 	
