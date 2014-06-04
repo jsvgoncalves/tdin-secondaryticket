@@ -84,5 +84,17 @@ public class Ticket {
 	public void setDescription(String description) {
 		Description = description;
 	}
+	
+	
+	@Override
+	public boolean equals(Object obj) {
+		
+		if( obj == null )
+			return false;
+		
+		Ticket tick = (Ticket)obj;
+		
+		return tick.ID != null && this.ID != null && this.ID.equals(tick.ID);
+	}
 
 }

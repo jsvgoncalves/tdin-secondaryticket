@@ -4,9 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.security.MessageDigest;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -19,7 +17,7 @@ import javax.swing.JTextArea;
 import resources.Colors;
 import resources.Strings;
 import controller.DataStore;
-import model.Ticket;
+import model.SecondaryTicket;
 
 public class Panel_Tickets extends JPanel{
 
@@ -28,7 +26,7 @@ public class Panel_Tickets extends JPanel{
 	 */
 	private static final long serialVersionUID = 2544401527566094718L;
 
-	JPanel ticket_list = new JPanel();
+	public JPanel ticket_list = new JPanel();
 	static JPanel ticket_area = new JPanel();
 
 	public Panel_Tickets() {
@@ -41,7 +39,8 @@ public class Panel_Tickets extends JPanel{
 		list_panel.setLayout(new BorderLayout());
 
 		ticket_list.setLayout(new BoxLayout(ticket_list, BoxLayout.PAGE_AXIS));
-		addTestTicketList();
+		//addTestTicketList();
+		//loadSecondaryTickets();
 
 		Button_App logout_btn = new Button_App(Strings.BUTTON_LOGOUT);
 		logout_btn.setFont(logout_btn.getFont().deriveFont(17f));
@@ -66,7 +65,7 @@ public class Panel_Tickets extends JPanel{
 
 	public static void loadTicket(String uuid){
 		ticket_area.setBackground(Colors.dark_grey);
-		Ticket t = DataStore.getInstance().tickets.get(uuid);
+		SecondaryTicket t = DataStore.getInstance().secTicketsDB.get(uuid);
 		ticket_area.removeAll();
 		ticket_area.setLayout(new BorderLayout());
 
@@ -86,15 +85,15 @@ public class Panel_Tickets extends JPanel{
 		description_lbl.setFont(title_lbl.getFont().deriveFont(18f));
 		description_lbl.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
-		JLabel name_lbl = new JLabel(Strings.PRE_SUBMITED_BY + t.getName());
+		JLabel name_lbl = new JLabel(Strings.PRE_SUBMITED_BY + "<to fill>");
 		name_lbl.setFont(title_lbl.getFont().deriveFont(15f));
 		name_lbl.setBorder(BorderFactory.createEmptyBorder(2, 20, 2, 20));
 
-		JLabel email_lbl = new JLabel(Strings.PRE_EMAIL + t.getEmail());
+		JLabel email_lbl = new JLabel(Strings.PRE_SOLVER + "<to fill>");
 		email_lbl.setFont(title_lbl.getFont().deriveFont(15f));
 		email_lbl.setBorder(BorderFactory.createEmptyBorder(2, 20, 2, 20));
 
-		JLabel date_lbl = new JLabel(Strings.PRE_DATE + t.getDate());
+		JLabel date_lbl = new JLabel(Strings.PRE_DATE + t.getCreated());
 		date_lbl.setFont(title_lbl.getFont().deriveFont(15f));
 		date_lbl.setBorder(BorderFactory.createEmptyBorder(2, 20, 2, 20));
 
@@ -150,29 +149,58 @@ public class Panel_Tickets extends JPanel{
 		ticket_area.repaint();
 	}
 
-	private void addTestTicketList(){
+//	private void addTestTicketList(){
+//
+//		for(int i = 0; i < 25; i++){
+//			Ticket t = new Ticket();
+//			t.setName("USER " + i);
+//			t.setDescription("This is a test description so that this\n field is not emptyhis is a test description\n so that this field is not emptyhis is a test\n description so that this field is not empty :) " + i);
+//			String timeStamp = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime());
+//			t.setDate(timeStamp);
+//			try {
+//				MessageDigest md = MessageDigest.getInstance("MD5");
+//				byte[] thedigest = md.digest(new String(""+i).getBytes());
+//				t.setID(new String(thedigest));
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//			t.setTitle("Title " + i);
+//			t.setEmail("myemail" + i + "@mail.com");
+//			final Panel_Ticket tp = new Panel_Ticket(t);
+//
+//			DataStore.getInstance().tickets.put(t.getID(), t);
+//			ticket_list.add(tp);
+//			if(i == 0){
+//				tp.setSelected(true);
+//			}
+//		}
+//	}
+	
+	public void loadSecondaryTickets()
+	{
+		boolean first = true;
+		ticket_list.removeAll();
+		DataStore store = DataStore.getInstance();
+		String depID = store.currentLoggedDepartment;
+		List<SecondaryTicket> list = null;
+		
+		if( depID == null )
+			return;
+		
+		list = store.secTickets.get(depID);
+		
+		if( list == null )
+			return;
+		
+		for(SecondaryTicket s : list)
+		{
+			final Panel_Ticket tp = new Panel_Ticket(s);
 
-		for(int i = 0; i < 25; i++){
-			Ticket t = new Ticket();
-			t.setName("USER " + i);
-			t.setDescription("This is a test description so that this\n field is not emptyhis is a test description\n so that this field is not emptyhis is a test\n description so that this field is not empty :) " + i);
-			String timeStamp = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime());
-			t.setDate(timeStamp);
-			try {
-				MessageDigest md = MessageDigest.getInstance("MD5");
-				byte[] thedigest = md.digest(new String(""+i).getBytes());
-				t.setID(new String(thedigest));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			t.setTitle("Title " + i);
-			t.setEmail("myemail" + i + "@mail.com");
-			final Panel_Ticket tp = new Panel_Ticket(t);
-
-			DataStore.getInstance().tickets.put(t.getID(), t);
 			ticket_list.add(tp);
-			if(i == 0){
+			if(first)
+			{
 				tp.setSelected(true);
+				first = false;
 			}
 		}
 	}

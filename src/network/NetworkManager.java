@@ -3,6 +3,7 @@ package network;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -18,8 +19,11 @@ import java.util.logging.Level;
 
 import model.Department;
 import model.SecondaryTicket;
+import model.Ticket;
 
 import org.json.*;
+
+import resources.JSONHelper;
 
 import com.sun.istack.internal.logging.Logger;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
@@ -39,17 +43,24 @@ public class NetworkManager {
     private static final String host = "http://ticket.algumavez.com";
     private static final String URL_DEPARTMENTS = "/departments.json";
     
-    private static final String URL_SEC_TICKETS = "/department/secondaryTickets.json";
+    private static final String URL_SEC_TICKETS = "/secondary_tickets/getLastTickets/%s/%s.json";
     
     
-    private static final String DEPARTMENTS_KEY = "departments";
-    private static final String DEPARTMENT_KEY = "Department";
+    private static final String DEPARTMENT_LIST_KEY = "departments";
+    private static final String DEPARTMENT_OBJECT_KEY = "Department";
     
-    private static final String SEC_TICKETS_KEY = "secondaryTickets";
-   
+    private static final String SEC_TICKETS_LIST_KEY = "secondaryTickets";
     
+    private static final String SEC_TICKET_OBJECT_KEY = "SecondaryTicket";
+    private static final String SEC_TICKET_OBJECT_TICKET_KEY = "Ticket";
     
-    private static final String CHARTSET = "UTF-8";
+    private static final String SEC_TICKET_SYNC_KEY = "request_date";    
+    
+    private static final String DEFAULT_CHARTSET = "UTF-8";
+    
+    private static final Charset CHARSET = Charset.forName(DEFAULT_CHARTSET);
+    
+    		
     
     private static final int TIMEOUT = 30000;
 
@@ -57,7 +68,7 @@ public class NetworkManager {
 
     private NetworkManager(String username, String password)
     {
-    	this.networkLogin = Base64.encode( (username + ":" + password).getBytes(Charset.forName(CHARTSET)));
+    	this.networkLogin = Base64.encode( (username + ":" + password).getBytes(CHARSET));
     }
 
 
@@ -84,9 +95,9 @@ public class NetworkManager {
             		if( _count > 0 )
             			sb.append("&");
             		
-            		sb.append(URLEncoder.encode(e.getKey(), CHARTSET));
+            		sb.append(URLEncoder.encode(e.getKey(), DEFAULT_CHARTSET));
             		sb.append("=");
-            		sb.append(URLEncoder.encode(e.getValue(), CHARTSET));
+            		sb.append(URLEncoder.encode(e.getValue(), DEFAULT_CHARTSET));
             		
             		_count++;            		
             	}
@@ -104,6 +115,7 @@ public class NetworkManager {
             HttpURLConnection c = (HttpURLConnection) _url.openConnection();
             
             c.setUseCaches(false);
+            c.setDoInput(true);
             c.setAllowUserInteraction(false);
             c.setConnectTimeout(TIMEOUT);
             c.setReadTimeout(TIMEOUT);
@@ -116,15 +128,15 @@ public class NetworkManager {
             
             else
             {
-            	c.setRequestProperty("Accept-Charset", CHARTSET);
-            	c.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + CHARTSET);
+            	c.setRequestProperty("Accept-Charset", DEFAULT_CHARTSET);
+            	c.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + DEFAULT_CHARTSET);
             	
             	if( query != null )
             	{
                 	c.setDoOutput(true); // Triggers POST.
                 	
                     try (OutputStream output = c.getOutputStream()) {
-                        output.write(query.getBytes(CHARTSET));
+                        output.write(query.getBytes(DEFAULT_CHARTSET));
                     }
             	}
             }
@@ -137,14 +149,21 @@ public class NetworkManager {
             response.statusCode = c.getResponseCode();
             response.contentType = c.getContentType();
             
-            System.out.println(response.contentType);
+            System.out.println("[" + response.statusCode + "] " + response.contentType);
             
 //            for(Entry<String, List<String>> e : c.getHeaderFields().entrySet())
 //            {
 //            	System.out.println(e.getKey() + ": " + e.getValue());
 //            }
+            InputStream is = null;
             
-            BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream()));
+            if (response.statusCode >= 400) {
+                is = c.getErrorStream();
+            } else {
+                is = c.getInputStream();
+            }
+            
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = br.readLine()) != null) {
@@ -152,6 +171,8 @@ public class NetworkManager {
             }
             br.close();
             response.rawResponse = sb.toString();
+            
+            //System.out.println(response.rawResponse);
             
             try {
 	            String[] ctype = response.contentType.split("\\;");
@@ -186,18 +207,19 @@ public class NetworkManager {
     
     
     
-    
     private NetworkResponse _performSimpleRequest(String url, String method)
     {
     	return _performRequest(url, true, method, null);
     }
-    private NetworkResponse _performSimpleRequest(String url, String method, Map<String, String> params)
+    @SuppressWarnings("unused")
+	private NetworkResponse _performSimpleRequest(String url, String method, Map<String, String> params)
     {
     	return _performRequest(url, true, method, params);
     }
     
     
-    private NetworkResponse _performContentRequest(String url, String method)
+    @SuppressWarnings("unused")
+	private NetworkResponse _performContentRequest(String url, String method)
     {
     	return _performRequest(url, false, method, null);
     }
@@ -224,16 +246,16 @@ public class NetworkManager {
     		
      		if(    res.ok
      			&& res.jsonResponse != null
-     			&& res.jsonResponse.has(DEPARTMENTS_KEY) )
+     			&& res.jsonResponse.has(DEPARTMENT_LIST_KEY) )
     		{
-        		JSONArray array = res.jsonResponse.getJSONArray(DEPARTMENTS_KEY);
+        		JSONArray array = res.jsonResponse.getJSONArray(DEPARTMENT_LIST_KEY);
         	    			
     			fillList.clear();
 
     			for( int i = 0; i < array.length(); i++)
     			{
     				try {
-    					JSONObject dep = array.getJSONObject(i).getJSONObject(DEPARTMENT_KEY);
+    					JSONObject dep = array.getJSONObject(i).getJSONObject(DEPARTMENT_OBJECT_KEY);
     					fillList.add(new Department(dep));
     				} catch(Exception ex) {
     				}
@@ -251,42 +273,60 @@ public class NetworkManager {
     
     
     
-    public boolean getDepartmentTickets(ArrayList<SecondaryTicket> fillList, String departament, long lastSync)
+    public String getDepartmentTickets(ArrayList<SecondaryTicket> secTicketList, String departamentID, String lastSyncDate)
     {
-    	if( fillList == null )
-    		return false;
+    	if( secTicketList == null )
+    		return null;
     	
     	try {
-    		HashMap<String, String> query = new HashMap<String, String>();
-    		query.put("department", departament);
-    		query.put("lastTime", "" + lastSync);
     		
-    		NetworkResponse res = _performSimpleRequest(URL_SEC_TICKETS, "GET", query);
+    		String url = String.format(URL_SEC_TICKETS, departamentID,
+    														Base64.encode(lastSyncDate.getBytes(CHARSET)));
+    		String lastSync = null;
+    		
+    		NetworkResponse res = _performSimpleRequest(url, "GET");
      		if(    res.ok
          		&& res.jsonResponse != null
-	    		&& res.jsonResponse.has(SEC_TICKETS_KEY) )
+	    		&& res.jsonResponse.has(SEC_TICKETS_LIST_KEY) )
     		{
-        		JSONArray array = res.jsonResponse.getJSONArray(SEC_TICKETS_KEY);
+     			lastSync = JSONHelper.getString(res.jsonResponse, SEC_TICKET_SYNC_KEY);
+        		JSONArray array = res.jsonResponse.getJSONArray(SEC_TICKETS_LIST_KEY);
         	    			
-    			fillList.clear();
+        		secTicketList.clear();
+        		
+        		
 
     			for( int i = 0; i < array.length(); i++)
     			{
     				try {
-    					JSONObject s_tick = array.getJSONObject(i);
-    					fillList.add(new SecondaryTicket(s_tick));
+    					JSONObject tick = array.getJSONObject(i);
+    					
+    					SecondaryTicket lastSecTicket = null;
+    					
+    					if( tick.has(SEC_TICKET_OBJECT_KEY) )
+    					{
+    						lastSecTicket = new SecondaryTicket(tick.getJSONObject(SEC_TICKET_OBJECT_KEY));
+    						secTicketList.add(lastSecTicket);
+    					}
+
+    					if(    tick.has(SEC_TICKET_OBJECT_TICKET_KEY)
+    						&& lastSecTicket != null )
+    					{
+    						lastSecTicket.setAssociatedTicket(
+    											new Ticket(tick.getJSONObject(SEC_TICKET_OBJECT_TICKET_KEY)) );
+    					}
     				} catch(Exception ex) {
     				}
     			}
 	    		
-	    		return true;
+	    		return lastSync;
     		}
     		
     	} catch(Exception ex) {
     		Logger.getLogger(NetworkManager.class).log(Level.SEVERE, null, ex);
     	}
     	
-    	return false;
+    	return null;
     }
     
     public boolean registerDepartment(String departament, String solver, String description, String key)

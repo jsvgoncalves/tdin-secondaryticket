@@ -6,9 +6,6 @@ import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import org.json.JSONArray;
-
-import network.NetworkManager;
 
 import resources.Strings;
 
@@ -21,7 +18,7 @@ public class ApplicationFrame extends JFrame{
 	
 	private static SwapablePanel swap_panel = new SwapablePanel();
 	private JPanel login_panel = new Panel_Login();
-	private JPanel ticket_panel = new Panel_Tickets();
+	private static Panel_Tickets ticket_panel = new Panel_Tickets();
 	
 	public ApplicationFrame() {
 		
@@ -49,5 +46,10 @@ public class ApplicationFrame extends JFrame{
 	
 	public static void SwitchPanel(String id){
 		swap_panel.switchTo(id); //Use login panel as default
+	}
+	
+	public static void reloadDepartmentTickets()
+	{
+		ticket_panel.loadSecondaryTickets();
 	}
 }

@@ -7,7 +7,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -17,9 +17,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import model.Department;
+import model.SecondaryTicket;
 import network.NetworkManager;
 
-import org.json.JSONArray;
 
 import controller.DataStore;
 
@@ -130,8 +130,28 @@ public class Panel_Login extends JPanel{
 				{
 					if( dep.getName().length() > 0 )
 					{
-						DataStore.getInstance().manager = NetworkManager.createNetworkManager(dep.getName(), DataStore.DEPARTMENT_PASSWORD_KEY);
+						DataStore store = DataStore.getInstance();
+						store.currentLoggedDepartment = dep.getId();
+						store.manager = NetworkManager.createNetworkManager(store.currentLoggedDepartment, DataStore.DEPARTMENT_PASSWORD_KEY);
 						
+						ArrayList<SecondaryTicket> secTickets = new ArrayList<SecondaryTicket>();
+						store.manager.getDepartmentTickets(secTickets, store.currentLoggedDepartment, "0");
+						
+						List<SecondaryTicket> list = store.secTickets.get( store.currentLoggedDepartment );
+						
+						if( list == null )
+						{
+							list = new ArrayList<SecondaryTicket>();
+							store.secTickets.put( store.currentLoggedDepartment, list );
+						}
+						
+						for(SecondaryTicket s : secTickets)
+						{
+							if( store.secTicketsDB.put(s.getID(), s) == null )
+								list.add(s);
+						}
+						
+						ApplicationFrame.reloadDepartmentTickets();
 						ApplicationFrame.SwitchPanel(ApplicationFrame.PANEL_TICKER_AREA_ID);
 					}
 				}

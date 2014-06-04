@@ -22,7 +22,7 @@ public class Strings {
 
 	//Prefixes
 	public static final String PRE_SUBMITED_BY = "Submited by: ";
-	public static final String PRE_EMAIL 		= "Email: ";
+	public static final String PRE_SOLVER 		= "Solver: ";
 	public static final String PRE_DATE  		= "Date: ";
 	public static final String PRE_ID  			= "ID: ";
 

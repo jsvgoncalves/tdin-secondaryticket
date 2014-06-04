@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 
 import resources.Colors;
 import resources.Strings;
-import model.Ticket;
+import model.SecondaryTicket;
 
 public class Panel_Ticket extends JPanel implements MouseListener{
 
@@ -23,17 +23,17 @@ public class Panel_Ticket extends JPanel implements MouseListener{
 
 	JLabel ticket_id_lbl = new JLabel();
 	private boolean isSelected = false;
-	private Ticket ticket;
+	private SecondaryTicket ticket;
 	JPanel content_panel = new JPanel();
 
-	public Panel_Ticket(Ticket ticket) {
+	public Panel_Ticket(SecondaryTicket ticket) {
 		this.ticket = ticket;
 		isSelected = false;
 		init();
 		addMouseListener(this);
 	}
 
-	public Ticket gettiTicket(){
+	public SecondaryTicket gettiTicket(){
 		return this.ticket;
 	}
 
@@ -45,7 +45,7 @@ public class Panel_Ticket extends JPanel implements MouseListener{
 		JLabel Title_lbl = new JLabel(ticket.getTitle());
 		Title_lbl.setFont(Title_lbl.getFont().deriveFont(17f));
 		content_panel.add(Title_lbl); //Add title
-		JLabel Date_lbl = new JLabel(Strings.PRE_DATE + ticket.getDate());
+		JLabel Date_lbl = new JLabel(Strings.PRE_DATE + ticket.getCreated());
 		content_panel.add(Date_lbl);  //Add Label
 		setBackground(Colors.TICKET_IDLE_BACKCOLOR);
 

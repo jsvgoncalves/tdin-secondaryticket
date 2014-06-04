@@ -81,7 +81,5 @@ public class Department {
 	public String toString() {
 		return "" + this.name;
 	}
-	
-	
 
 }
